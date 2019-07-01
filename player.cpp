@@ -9,22 +9,10 @@
 
 
 extern const int in_jail = -1;
-std::vector<player> players;
-
-
-void init(){
-	int number_of_players;
-	std::cout<< "Enter number of players: ";
-	std::cin>> number_of_players;
-	for(int i=0; i<number_of_players; i++){
-		players.push_back(player(i + 1));
-	}
-}
-
+std::vector<player> current_players;
 
 // Constructor
-player::player(int num){
-	name = num;
+player::player(int num, std::string name): num(num), name(name){
 	money = 0;
 	position = 0;
 	rolls_out_of_jail = 0;
@@ -38,15 +26,18 @@ void player::add_money(int amount){
 
 
 void player::add_property(property* new_property){
-	new_property->setowner(name);
+	new_property->setowner(num);
 	owned.insert(new_property);
 }
 
 
-int player::getname(){
-	return name;
+int player::getnum(){
+	return num;
 }
 
+std::string player::getname(){
+	return name;
+}
 
 int player::getmoney(){
 	return money;
@@ -57,6 +48,55 @@ bool player::own(property property){
 	return owned.find(&property) != owned.end();
 }
 
+void player::buy(property property){
+	property.setowner(num);
+	money -= property.getprice();
+	owned.insert(&property);
+}
+
+void player::mortgage(property property){
+	property.ismortgaged = true;
+	money += property.getmortgagevalue();
+}
+
+void player::taketurn(){
+	char response;
+	if(position != in_jail){
+		goto roll;
+	}
+	if(get_out_of_jail_free){
+		std::cout<< "Do you want to use your get out of jail free? ";
+		std::cin>> response;
+		if (!std::cin){
+			std::cerr<< "Invalid input given player::taketurn()" <<std::endl;
+			return;
+		}
+		if(response == 'y' || response == 'Y'){
+			get_out_of_jail_free = false;
+			position = 10;
+			goto roll;
+		}
+	}
+	goto try_rolling_double;
+	roll:
+		rolls_out_of_jail = 0;
+		roll();
+		return;
+	try_rolling_double:
+		if (rand() % 6 == rand() % 6){
+			position = 10;
+			goto roll;
+		} else{
+			++rolls_out_of_jail;
+			if(rolls_out_of_jail == 3){
+				goto pay;
+			}
+		}
+	pay:
+		money -= 50;
+		position = 10;
+		goto roll;
+}
 
 void player::roll(){
 	int reroll = 0;
@@ -89,51 +129,59 @@ void player::advance(int distance){
 		position = in_jail;
 	}
 	position += distance;
+	// pass go
+	if (position >= 40){
+		++money;
+		position %= 40;
+	}
 	switch(position){
 	case 4:
 		// income tax
 		money -= 200;
-		break;
+		return;
 	case 30:
 		// go to jail
 		position = in_jail;
-		break;
+		return;
 	case 38:
 		// luxury tax
 		money -= 75;
-		break;
+		return;
 	case 2: case 17: case 33:
 		//community chest
 		break;
 	case 7: case 22: case 36:
 		//chance
 		break;
-	case 12:
-		//electricity
-		if (utilities[0]->getowner() == utilities[1]->getowner()){
-			players[utilities[0]->getowner() - 1].add_money(distance * 10);
-			money -= distance * 10;
-		} else{
-			players[utilities[0]->getowner() - 1].add_money(distance * 4);
-			money -= distance * 4;
-		}
-		break;
-	case 28:
-		//water
-		if (utilities[0]->getowner() == utilities[1]->getowner()){
-			players[utilities[0]->getowner() - 1].add_money(distance * 10);
-		} else{
-			players[utilities[1]->getowner() - 1].add_money(distance * 4);
-		}
-		break;
-	default:
-		for(int i=0; i<26; i++){
-			if(streets[i]->getposition() == position){
-				money -= streets[i]->getrent();
-				players[streets[i]->getowner() - 1].add_money(streets[i]->getrent());
-				return;
+	case 12: case 28:
+		//utility
+	{
+		utility* current = dynamic_cast<utility*>(current_board[position]);
+		int utilities_owned = 0, i = 0;
+		while (i < 2){
+			if (current_players[current->getowner() - 1].own(*utilities[i]) && !utilities[i]->ismortgaged){
+				utilities_owned++;
 			}
+			++i;
 		}
+		if (utilities_owned == 0){
+			return;
+		} else if (utilities_owned == 1){
+			money -= 4 * distance;
+			current_players[current->getowner() - 1].add_money(4 * distance) ;
+		} else if (utilities_owned == 2){
+			money -= 10 * distance;
+			current_players[current->getowner() - 1].add_money(10 * distance) ;
+		}
+		return;
+	}
+	default:
+		property* current = dynamic_cast<property*>(current_board[position]);
+		if (!current->ismortgaged){
+			money -= current->getrent();
+			current_players[current->getowner() - 1].add_money(current->getrent());
+		}
+		return;
 	}
 }
 

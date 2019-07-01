@@ -10,7 +10,8 @@
 
 #include "property.h"
 #include <set>
-#include <algorithm>
+#include <ctime>
+
 
 extern const int in_jail;
 
@@ -22,17 +23,22 @@ struct property_sort {
 
 class player {
 public:
-	player(int num);
+	player(int num, std::string name);
 	void add_money(int amount);
 	void add_property(property* new_property);
 	// class functions
-	int getname();
+	int getnum();
+	std::string getname();
 	int getmoney();
 	bool own(property property);
+	void buy(property property);
+	void mortgage(property property);
+	void taketurn();
 	void roll();
 	void advance(int distance);
 private:
-	int name;
+	int num;
+	std::string name;
 	int money;
 	int position;
 	int rolls_out_of_jail;
@@ -40,9 +46,7 @@ private:
 	std::set<property*, property_sort> owned;
 };
 
-void init();
-
-extern std::vector<player> players;
+extern std::vector<player> current_players;
 
 
 #endif /* PLAYER_H_ */
