@@ -16,7 +16,7 @@ board::board() {
 	std::string input_str;
 	players_prompt:
 	std::cout<< "Enter number of players: ";
-	std::cin>> input_str;
+	std::cin>> input_int;
 	std::cerr<< input_int << std::endl;
 	std::cin.ignore();
 	for(int i=0; i<input_int; ++i){
