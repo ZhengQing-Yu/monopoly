@@ -51,6 +51,10 @@ void street::addhouse(){
 	++house;
 }
 
+int street::gethousenum(){
+	return house;
+}
+
 int street::getrent(){
 	if (!ismortgaged){
 		return rent.at(house);
@@ -74,7 +78,7 @@ int railroad::getrent(){
 	}
 	int railroad_owned = 0;
 	for (int i=0; i<4; i++){
-		if(railroads[i]->getowner() == owner){
+		if(railroads[i]->getowner() == getowner()){
 			railroad_owned++;
 		}
 	}
@@ -144,15 +148,13 @@ std::ostream& property::output(std::ostream& out) const{
 
 std::ostream& street::output(std::ostream& out) const{
 	property::output(out);
-	out<< '\t' << "Price: " << price << std::endl;
-	out<< '\t' << "Mortgage Value: " << mortgage << std::endl;
 	out<< '\t' << "Rent:" << std::endl;
-	out<< '\t' << '\t' << "0 house: " << rent[0] << std::endl;
-	out<< '\t' << '\t' << "1 house: " << rent[1] << std::endl;
-	out<< '\t' << '\t' << "2 house: " << rent[2] << std::endl;
-	out<< '\t' << '\t' << "3 house: " << rent[3] << std::endl;
-	out<< '\t' << '\t' << "4 house: " << rent[4] << std::endl;
-	out<< '\t' << '\t' << "Hotel  : " << rent[5] << std::endl;
+	out<< '\t' << ((house == 0)? "--->" : "    ") << "0 house: " << rent[0] << std::endl;
+	out<< '\t' << ((house == 1)? "--->" : "    ") << "1 house: " << rent[1] << std::endl;
+	out<< '\t' << ((house == 2)? "--->" : "    ") << "2 house: " << rent[2] << std::endl;
+	out<< '\t' << ((house == 3)? "--->" : "    ") << "3 house: " << rent[3] << std::endl;
+	out<< '\t' << ((house == 4)? "--->" : "    ") << "4 house: " << rent[4] << std::endl;
+	out<< '\t' << ((house == 5)? "--->" : "    ") << "Hotel  : " << rent[5] << std::endl;
 	out<< '\t' << "House costs " << houseprice << std::endl;
  	return out;
 }

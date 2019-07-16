@@ -43,7 +43,7 @@ class property: public square{
 		}
 		virtual property operator=(const property& rhs);
 		virtual std::ostream& output(std::ostream& out) const;
-	protected:
+	private:
 		int owner = 0;
 		int mortgage;
 		int price;
@@ -56,12 +56,13 @@ class street: public property{
 				int mortgage, int houseprice, int price);
 		int gethouseprice() const;
 		void addhouse();
+		int gethousenum();
 		int getrent() override;
 		virtual ~street(){};
 		virtual street* clone() const;
 		virtual street operator=(const street& rhs);
 		virtual std::ostream& output(std::ostream& out) const;
-	protected:
+	private:
 		std::vector<int> rent;
 		int houseprice;
 		int house = 0;

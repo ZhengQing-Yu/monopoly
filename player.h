@@ -16,7 +16,7 @@
 extern const int in_jail;
 
 struct property_sort {
-	bool operator() (property* x, property* y){
+	inline bool operator() (const property* const x, const property* const y) const{
 		return x->getposition() < y->getposition();
 	}
 };
@@ -24,12 +24,12 @@ struct property_sort {
 class player {
 public:
 	player(int num, std::string name);
-	void add_money(int amount);
-	void add_property(property* new_property);
+	void addmoney(int amount);
+	void addproperty(property* new_property);
 	// class functions
-	int getnum();
-	std::string getname();
-	int getmoney();
+	int getnum() const;
+	std::string getname() const;
+	int getmoney() const;
 	bool own(property property);
 	void buy(property property);
 	void mortgage(property property);
@@ -39,7 +39,7 @@ public:
 private:
 	int num;
 	std::string name;
-	int money;
+	int money = 1500;
 	int position;
 	int rolls_out_of_jail;
 	bool get_out_of_jail_free;

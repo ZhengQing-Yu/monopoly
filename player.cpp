@@ -20,26 +20,26 @@ player::player(int num, std::string name): num(num), name(name){
 }
 
 
-void player::add_money(int amount){
+void player::addmoney(int amount){
 	money += amount;
 }
 
 
-void player::add_property(property* new_property){
+void player::addproperty(property* new_property){
 	new_property->setowner(num);
 	owned.insert(new_property);
 }
 
 
-int player::getnum(){
+int player::getnum() const{
 	return num;
 }
 
-std::string player::getname(){
+std::string player::getname() const{
 	return name;
 }
 
-int player::getmoney(){
+int player::getmoney() const{
 	return money;
 }
 
@@ -156,7 +156,7 @@ void player::advance(int distance){
 	case 12: case 28:
 		//utility
 	{
-		utility* current = dynamic_cast<utility*>(current_board[position]);
+		utility* current = static_cast<utility*>(current_board[position]);
 		int utilities_owned = 0, i = 0;
 		while (i < 2){
 			if (current_players[current->getowner() - 1].own(*utilities[i]) && !utilities[i]->ismortgaged){
@@ -168,18 +168,18 @@ void player::advance(int distance){
 			return;
 		} else if (utilities_owned == 1){
 			money -= 4 * distance;
-			current_players[current->getowner() - 1].add_money(4 * distance) ;
+			current_players[current->getowner() - 1].addmoney(4 * distance) ;
 		} else if (utilities_owned == 2){
 			money -= 10 * distance;
-			current_players[current->getowner() - 1].add_money(10 * distance) ;
+			current_players[current->getowner() - 1].addmoney(10 * distance) ;
 		}
 		return;
 	}
 	default:
-		property* current = dynamic_cast<property*>(current_board[position]);
+		property* current = static_cast<property*>(current_board[position]);
 		if (!current->ismortgaged){
 			money -= current->getrent();
-			current_players[current->getowner() - 1].add_money(current->getrent());
+			current_players[current->getowner() - 1].addmoney(current->getrent());
 		}
 		return;
 	}
