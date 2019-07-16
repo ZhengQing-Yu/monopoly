@@ -171,12 +171,15 @@ void board::save(const std::string& filename){
 	if(!overwrite){
 		// try adding numbers (i) before the extension to get an unique filename
 		int i = 1;
+		filesystem::path new_filename;
 		do{
-			output_filename.replace_filename(output_filename.stem().string() + "(" +
-						   	std::to_string(i) + ")" + output_filename.extension().string());
+			new_filename = output_filename;
+			new_filename.replace_filename(new_filename.stem().string() + "(" +
+						std::to_string(i) + ")" + new_filename.extension().string());
 			++i;
 		}
-		while(filesystem::exists(output_filename));
+		while(filesystem::exists(new_filename));
+		output_filename = new_filename;
 	} else{
 		// delete file before creating a new one
 		// if the file did not exist before, nothing is done
