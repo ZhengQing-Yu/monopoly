@@ -6,182 +6,182 @@
  */
 
 #include "player.h"
-
+#include <ctime>
 
 extern const int in_jail = -1;
-std::vector<player> current_players;
+std::vector<player> in_board->players;
 
 // Constructor
-player::player(int num, std::string name): num(num), name(name){
-	money = 0;
-	position = 0;
-	rolls_out_of_jail = 0;
-	get_out_of_jail_free = false;
+player::player(int num, std::string name): num(num), name(name), in_board(in_board){
+    money = 0;
+    position = 0;
+    rolls_out_of_jail = 0;
+    get_out_of_jail_free = false;
 }
 
 
 void player::addmoney(int amount){
-	money += amount;
+    money += amount;
 }
 
 
 void player::addproperty(property* new_property){
-	new_property->setowner(num);
-	owned.insert(new_property);
+    new_property->setowner(num);
+    owned.insert(new_property);
 }
 
 
 int player::getnum() const{
-	return num;
+    return num;
 }
 
 std::string player::getname() const{
-	return name;
+    return name;
 }
 
 int player::getmoney() const{
-	return money;
+    return money;
 }
 
 
-bool player::own(property property){
-	return owned.find(&property) != owned.end();
+bool player::own(property* property){
+    return owned.find(property) != owned.end();
 }
 
-void player::buy(property property){
-	property.setowner(num);
-	money -= property.getprice();
-	owned.insert(&property);
+void player::buy(property* property){
+    property->setowner(num);
+    money -= property->getprice();
+    owned->insert(property);
 }
 
-void player::mortgage(property property){
-	property.ismortgaged = true;
-	money += property.getmortgagevalue();
+void player::mortgage(property* property){
+    property->ismortgaged = true;
+    money += property->getmortgagevalue();
 }
 
 void player::taketurn(){
-	char response;
-	if(position != in_jail){
-		goto roll;
-	}
-	if(get_out_of_jail_free){
-		std::cout<< "Do you want to use your get out of jail free? ";
-		std::cin>> response;
-		if (!std::cin){
-			std::cerr<< "Invalid input given player::taketurn()" <<std::endl;
-			return;
-		}
-		if(response == 'y' || response == 'Y'){
-			get_out_of_jail_free = false;
-			position = 10;
-			goto roll;
-		}
-	}
-	goto try_rolling_double;
-	roll:
-		rolls_out_of_jail = 0;
-		roll();
-		return;
-	try_rolling_double:
-		if (rand() % 6 == rand() % 6){
-			position = 10;
-			goto roll;
-		} else{
-			++rolls_out_of_jail;
-			if(rolls_out_of_jail == 3){
-				goto pay;
-			}
-		}
-	pay:
-		money -= 50;
-		position = 10;
-		goto roll;
+    char response;
+    if(position != in_jail){
+        goto roll;
+    }
+    if(get_out_of_jail_free){
+        std::cout<< "Do you want to use your get out of jail free? ";
+        std::cin>> response;
+        if (!std::cin){
+            std::cerr<< "Invalid input given player::taketurn()" <<std::endl;
+            return;
+        }
+        if(response == 'y' || response == 'Y'){
+            get_out_of_jail_free = false;
+            position = 10;
+            goto roll;
+        }
+    }
+    goto try_rolling_double;
+    roll:
+        rolls_out_of_jail = 0;
+        roll();
+        return;
+    try_rolling_double:
+        if (rand() % 6 == rand() % 6){
+            position = 10;
+            goto roll;
+        } else{
+            ++rolls_out_of_jail;
+            if(rolls_out_of_jail == 3){
+                goto pay;
+            }
+        }
+    pay:
+        money -= 50;
+        position = 10;
+        goto roll;
 }
 
 void player::roll(){
-	int reroll = 0;
-	int dice1 = (int)(((((double)std::rand()) / RAND_MAX) * 6) + 1);
-	int dice2 = (int)(((((double)std::rand()) / RAND_MAX) * 6) + 1);
+    int reroll = 0;
+    int dice1 = (int)(((((double)std::rand()) / RAND_MAX) * 6) + 1);
+    int dice2 = (int)(((((double)std::rand()) / RAND_MAX) * 6) + 1);
 
-	do{
-		dice1 = rand() % 6 + 1;
-		dice2 = rand() % 6 + 1;
-		//std::cout << "dice1: " << dice1 << " dice2: " << dice2 <<endl;
-		if (dice1 == dice2){
-			reroll++;
-			//std::cout << "rolled a double" << endl;
-		} else{
-			reroll = 0;
-		}
-		if (reroll == 3){
-			advance(in_jail);
-			//std::cout << "goto jail" << endl;
-			return;
-		}
-		advance(dice1 + dice2);
-	}while (reroll != 0);
-	//std::cout << endl;
+    do{
+        dice1 = rand() % 6 + 1;
+        dice2 = rand() % 6 + 1;
+        //std::cout << "dice1: " << dice1 << " dice2: " << dice2 <<endl;
+        if (dice1 == dice2){
+            reroll++;
+            //std::cout << "rolled a double" << endl;
+        } else{
+            reroll = 0;
+        }
+        if (reroll == 3){
+            advance(in_jail);
+            //std::cout << "goto jail" << endl;
+            return;
+        }
+        advance(dice1 + dice2);
+    }while (reroll != 0);
+    //std::cout << endl;
 }
 
 
 void player::advance(int distance){
-	if (distance == in_jail){
-		position = in_jail;
-	}
-	position += distance;
-	// pass go
-	if (position >= 40){
-		++money;
-		position %= 40;
-	}
-	switch(position){
-	case 4:
-		// income tax
-		money -= 200;
-		return;
-	case 30:
-		// go to jail
-		position = in_jail;
-		return;
-	case 38:
-		// luxury tax
-		money -= 75;
-		return;
-	case 2: case 17: case 33:
-		//community chest
-		break;
-	case 7: case 22: case 36:
-		//chance
-		break;
-	case 12: case 28:
-		//utility
-	{
-		utility* current = static_cast<utility*>(current_board[position]);
-		int utilities_owned = 0, i = 0;
-		while (i < 2){
-			if (current_players[current->getowner() - 1].own(*utilities[i]) && !utilities[i]->ismortgaged){
-				utilities_owned++;
-			}
-			++i;
-		}
-		if (utilities_owned == 0){
-			return;
-		} else if (utilities_owned == 1){
-			money -= 4 * distance;
-			current_players[current->getowner() - 1].addmoney(4 * distance) ;
-		} else if (utilities_owned == 2){
-			money -= 10 * distance;
-			current_players[current->getowner() - 1].addmoney(10 * distance) ;
-		}
-		return;
-	}
-	default:
-		property* current = static_cast<property*>(current_board[position]);
-		if (!current->ismortgaged){
-			money -= current->getrent();
-			current_players[current->getowner() - 1].addmoney(current->getrent());
-		}
-		return;
-	}
+    if (distance == in_jail){
+        position = in_jail;
+    }
+    position += distance;
+    // pass go
+    if (position >= 40){
+        ++money;
+        position %= 40;
+    }
+    switch(position){
+    case 4:
+        // income tax
+        money -= 200;
+        return;
+    case 30:
+        // go to jail
+        position = in_jail;
+        return;
+    case 38:
+        // luxury tax
+        money -= 75;
+        return;
+    case 2: case 17: case 33:
+        //community chest
+        break;
+    case 7: case 22: case 36:
+        //chance
+        break;
+    case 12: case 28:
+        //utility
+    {
+        utility* current = static_cast<utility*>(in_board->board[position]);
+        int utilities_owned = 0, i = 0;
+        while (i < 2){
+            if (in_board->players[current->getowner() - 1].own(*utilities[i]) && !utilities[i]->ismortgaged){
+                utilities_owned++;
+            }
+            ++i;
+        }
+        if (utilities_owned == 0){
+            return;
+        } else if (utilities_owned == 1){
+            money -= 4 * distance;
+            in_board->players[current->getowner() - 1].addmoney(4 * distance) ;
+        } else if (utilities_owned == 2){
+            money -= 10 * distance;
+            in_board->players[current->getowner() - 1].addmoney(10 * distance) ;
+        }
+        return;
+    }
+    default:
+        property* current = static_cast<property*>(in_board->board[position]);
+        if (!current->ismortgaged){
+            money -= current->getrent();
+            in_board->players[current->getowner() - 1].addmoney(current->getrent());
+        }
+        return;
+    }
 }
 
