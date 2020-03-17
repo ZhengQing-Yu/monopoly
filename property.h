@@ -36,7 +36,7 @@ class property: public square{
         virtual ~property(){};
         // gets overridden by get_rent() method in its derived classes
         virtual int getrent() const = 0;
-        virtual std::ostream& output(std::ostream& out) const;
+        virtual std::ostream& output(std::ostream& out) const = 0;
     private:
         int owner = 0;
         int mortgage;
@@ -90,6 +90,6 @@ std::ostream& operator<<(std::ostream& out, const utility& rhs);
 extern property* const properties[];
 extern railroad* const railroads[];
 extern utility* const utilities[];
-extern square* const current_board[];
+extern square* const default_board[];
 
 #endif /* PROPERTY_H_ */

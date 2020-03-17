@@ -12,7 +12,7 @@
 #include <filesystem>
 
 
-board::board() {
+Board::Board() {
     // initializes a default blank board
     for(int i=0; i<40; ++i){
         board[i] = default_board[i]->clone();
@@ -40,7 +40,7 @@ board::board() {
         std::string name;
         std::cout<< "Enter name of player " << i + 1 << ": ";
         std::getline(std::cin, name);
-        players.push_back(player(i, name, this));
+        players.push_back(Player(i, name, this));
     }
     newgame_prompt:
     std::cout<< "Do you wish to start a new game? (y/n)" << std::endl;
@@ -136,7 +136,21 @@ board::board() {
 }
 
 
-void board::save(const std::string& filename){
+std::ostream& Board::output(std::ostream& out) const{
+	for (int i=0; i<40; ++i){
+		board[i]->output(out);
+		out << std::endl;
+	}
+	return out;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const Board& rhs){
+	return rhs.output(out);
+}
+
+
+void Board::save(const std::string& filename){
     namespace filesystem = std::filesystem;
     filesystem::path output_filename(filename);
     if(!output_filename.has_extension()){
@@ -207,7 +221,7 @@ void board::save(const std::string& filename){
 
 }
 
-board::~board() {
+Board::~Board() {
     for(int i=0; i<40; ++i){
         delete board[i];
     }

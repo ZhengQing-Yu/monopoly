@@ -74,7 +74,7 @@ street::street(std::string name, int posn, int h0, int h1, int h2, int h3, int h
 }
 
 
-int railroad::getrent(){
+int railroad::getrent() const{
     if (ismortgaged){
         return 0;
     }
@@ -97,7 +97,7 @@ utility::utility(std::string name, int posn, int mtg, int property_cost)
 
 }
 
-int utility::getrent(){
+int utility::getrent() const{
     throw std::domain_error("Call to utility::getrent()");
 }
 
